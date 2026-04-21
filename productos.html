@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Veloz | Productos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body data-page="productos">
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">CV</span>
+        <span>
+          <strong>Catálogo Veloz</strong>
+          <small>Gestión clara de productos</small>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a href="./index.html">Inicio</a>
+        <a class="active" href="./productos.html">Productos</a>
+        <a href="./agregar-producto.html">Agregar</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="section-block compact-top">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Listado general</span>
+            <h1>Productos</h1>
+          </div>
+          <a class="btn btn-primary" href="./agregar-producto.html">Nuevo producto</a>
+        </div>
+
+        <div class="toolbar">
+          <label class="field search-field">
+            <span>Buscar</span>
+            <input id="search-input" type="search" placeholder="Nombre, categoría o SKU">
+          </label>
+
+          <label class="field select-field">
+            <span>Ordenar</span>
+            <select id="sort-select">
+              <option value="nombre-asc">Nombre A-Z</option>
+              <option value="nombre-desc">Nombre Z-A</option>
+              <option value="precio-asc">Precio menor</option>
+              <option value="precio-desc">Precio mayor</option>
+              <option value="stock-desc">Mayor stock</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="stats-row">
+          <article class="mini-stat">
+            <span>Total de productos</span>
+            <strong id="total-productos">--</strong>
+          </article>
+          <article class="mini-stat">
+            <span>Inventario disponible</span>
+            <strong id="total-stock">--</strong>
+          </article>
+          <article class="mini-stat">
+            <span>Valor promedio</span>
+            <strong id="precio-promedio">--</strong>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <div id="productos-grid" class="product-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/productos.js"></script>
+</body>
+</html>

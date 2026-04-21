@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Veloz | Inicio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body data-page="inicio">
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">CV</span>
+        <span>
+          <strong>Catálogo Veloz</strong>
+          <small>Gestión clara de productos</small>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a class="active" href="./index.html">Inicio</a>
+        <a href="./productos.html">Productos</a>
+        <a href="./agregar-producto.html">Agregar</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">Frontend listo para conectar con tu API</span>
+          <h1>Una vitrina moderna para listar, consultar y administrar productos.</h1>
+          <p>
+            Esta base incluye páginas para ver el catálogo, consultar detalles, agregar productos y editar registros.
+            La URL del backend está centralizada en <code>js/config.js</code>.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="./productos.html">Explorar productos</a>
+            <a class="btn btn-secondary" href="./agregar-producto.html">Agregar un producto</a>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <div class="stat-card">
+            <span class="stat-label">Productos cargados</span>
+            <strong id="home-product-count">--</strong>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Inventario estimado</span>
+            <strong id="home-stock-count">--</strong>
+          </div>
+          <div class="stat-card stat-card-accent">
+            <span class="stat-label">Precio promedio</span>
+            <strong id="home-average-price">--</strong>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Vista rápida</span>
+            <h2>Productos destacados</h2>
+          </div>
+          <a class="text-link" href="./productos.html">Ver catálogo completo</a>
+        </div>
+        <div id="home-featured-products" class="product-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    import { fetchProductos, formatCurrency, renderProductCard, setLoadingBlock, showToast } from './js/helpers.js';
+
+    const featuredContainer = document.getElementById('home-featured-products');
+    const countEl = document.getElementById('home-product-count');
+    const stockEl = document.getElementById('home-stock-count');
+    const averageEl = document.getElementById('home-average-price');
+
+    async function loadHome() {
+      setLoadingBlock(featuredContainer, 'Cargando productos destacados...');
+
+      try {
+        const productos = await fetchProductos();
+        const destacados = productos.slice(0, 3);
+        const totalStock = productos.reduce((acc, item) => acc + (Number(item.stock) || 0), 0);
+        const averagePrice = productos.length
+          ? productos.reduce((acc, item) => acc + (Number(item.precio) || 0), 0) / productos.length
+          : 0;
+
+        countEl.textContent = productos.length;
+        stockEl.textContent = totalStock;
+        averageEl.textContent = formatCurrency(averagePrice);
+
+        if (!destacados.length) {
+          featuredContainer.innerHTML = '<article class="empty-state"><h3>No hay productos todavía</h3><p>Empieza agregando uno desde el panel de administración.</p></article>';
+          return;
+        }
+
+        featuredContainer.innerHTML = '';
+        destacados.forEach((producto) => {
+          featuredContainer.appendChild(renderProductCard(producto, { showDelete: false }));
+        });
+      } catch (error) {
+        countEl.textContent = '0';
+        stockEl.textContent = '0';
+        averageEl.textContent = formatCurrency(0);
+        featuredContainer.innerHTML = `<article class="empty-state"><h3>No se pudo cargar la portada</h3><p>${error.message}</p></article>`;
+        showToast(error.message, 'error');
+      }
+    }
+
+    loadHome();
+  </script>
+</body>
+</html>

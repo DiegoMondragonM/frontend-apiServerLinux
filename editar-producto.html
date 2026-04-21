@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Veloz | Editar producto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body data-page="editar">
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">CV</span>
+        <span>
+          <strong>Catálogo Veloz</strong>
+          <small>Gestión clara de productos</small>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a href="./index.html">Inicio</a>
+        <a href="./productos.html">Productos</a>
+        <a class="active" href="./agregar-producto.html">Editar</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="form-layout">
+        <article class="form-copy card-panel">
+          <span class="eyebrow">Mantenimiento</span>
+          <h1>Editar producto</h1>
+          <p>
+            Esta vista carga el producto por su <code>id</code> desde la URL y envía un <code>PUT</code> al guardar.
+          </p>
+          <ul class="check-list">
+            <li>Abre esta página con <code>?id=123</code>.</li>
+            <li>Si tu API devuelve otro nombre de campos, podemos mapearlos en <code>helpers.js</code>.</li>
+            <li>Usa el ID de categoría que exista en tu base de datos.</li>
+          </ul>
+        </article>
+
+        <form id="producto-form" class="product-form card-panel">
+          <div class="form-grid">
+            <label class="field">
+              <span>Nombre *</span>
+              <input name="nombre" type="text" required maxlength="120" placeholder="Ej. Laptop Pro 14">
+            </label>
+
+            <label class="field">
+              <span>Precio *</span>
+              <input name="precio" type="number" required min="0" step="0.01" placeholder="0.00">
+            </label>
+
+            <label class="field">
+              <span>ID de categoría</span>
+              <input name="categoria_id" type="number" min="1" step="1" placeholder="1">
+            </label>
+
+            <label class="field">
+              <span>Stock</span>
+              <input name="stock" type="number" min="0" step="1" value="0">
+            </label>
+
+            <label class="field field-full">
+              <span>URL de imagen</span>
+              <input id="imagen-input" name="imagen_url" type="url" placeholder="https://...">
+            </label>
+
+            <label class="field field-full">
+              <span>Descripción</span>
+              <textarea name="descripcion" rows="5" placeholder="Describe el producto, sus ventajas y características."></textarea>
+            </label>
+          </div>
+
+          <div class="preview-box">
+            <span>Vista previa de imagen</span>
+            <img id="preview-image" src="./img/product-placeholder.svg" alt="Vista previa del producto">
+          </div>
+
+          <div class="form-actions">
+            <a class="btn btn-secondary" href="./productos.html">Cancelar</a>
+            <button id="submit-button" class="btn btn-primary" type="submit">Actualizar producto</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/editar-producto.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Veloz | Detalle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body data-page="detalle">
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="./index.html">
+        <span class="brand-mark">CV</span>
+        <span>
+          <strong>Catálogo Veloz</strong>
+          <small>Gestión clara de productos</small>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a href="./index.html">Inicio</a>
+        <a class="active" href="./productos.html">Productos</a>
+        <a href="./agregar-producto.html">Agregar</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="section-block compact-top">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Consulta del registro</span>
+            <h1>Detalle del producto</h1>
+          </div>
+          <a class="btn btn-secondary" href="./productos.html">Volver al catálogo</a>
+        </div>
+      </section>
+
+      <section id="detalle-container" class="detail-layout"></section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/detalle.js"></script>
+</body>
+</html>
