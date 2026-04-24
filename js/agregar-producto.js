@@ -17,22 +17,24 @@ applyImagePreview(imageInput, previewImage);
 
 async function cargarCategorias() {
   const select = document.getElementById("categoria-select");
+
   try {
-    const baseUrl = getApiBaseUrl();
-    const categoriasUrl = baseUrl ? baseUrl.replace("/productos", "/categorias") : "/categorias";
-    const response = await requestJson(categoriasUrl);
+    const response = await requestJson("http://192.168.1.65/api/categorias");
 
     if (response.ok && response.categorias) {
       select.innerHTML = '<option value="">Selecciona una categoría...</option>';
+
       response.categorias.forEach(cat => {
         const option = document.createElement("option");
         option.value = cat.categoria_id;
         option.textContent = cat.nombre;
         select.appendChild(option);
       });
+
     } else {
       select.innerHTML = '<option value="">Error al cargar categorías</option>';
     }
+
   } catch (error) {
     console.error("Error al cargar categorías:", error);
     select.innerHTML = '<option value="">Error de conexión</option>';
