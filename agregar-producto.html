@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Catálogo Veloz | Agregar producto</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="./css/styles.css">
 </head>
+
 <body data-page="agregar">
   <div class="page-shell">
     <header class="site-header">
@@ -54,8 +58,10 @@
             </label>
 
             <label class="field">
-              <span>ID de categoría</span>
-              <input name="categoria_id" type="number" min="1" step="1" placeholder="1">
+              <span>Categoría</span>
+              <select name="categoria_id" id="categoria-select" required>
+                <option value="">Cargando categorías...</option>
+              </select>
             </label>
 
             <label class="field">
@@ -70,7 +76,8 @@
 
             <label class="field field-full">
               <span>Descripción</span>
-              <textarea name="descripcion" rows="5" placeholder="Describe el producto, sus ventajas y características."></textarea>
+              <textarea name="descripcion" rows="5"
+                placeholder="Describe el producto, sus ventajas y características."></textarea>
             </label>
           </div>
 
@@ -91,4 +98,5 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script type="module" src="./js/agregar-producto.js"></script>
 </body>
+
 </html>
