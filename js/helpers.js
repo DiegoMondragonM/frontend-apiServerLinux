@@ -6,16 +6,48 @@ function isAbsoluteUrl(value = "") {
   return /^https?:\/\//i.test(value);
 }
 
+function isInlineAsset(value = "") {
+  return /^(blob:|data:)/i.test(value);
+}
+
+function joinUrl(base, path) {
+  return new URL(path.replace(/^\//, ""), `${base.replace(/\/$/, "")}/`).toString();
+}
+
 export function resolveImageUrl(value) {
   if (!value) return FALLBACK_IMAGE;
-  if (isAbsoluteUrl(value)) return value;
-  if (value.startsWith("/uploads/")) {
-    return buildApiUrl(value);
+  const normalizedValue = String(value).trim().replace(/\\/g, "/");
+
+  if (isInlineAsset(normalizedValue) || isAbsoluteUrl(normalizedValue)) {
+    return normalizedValue;
   }
-  if (value.startsWith("/")) {
-    return `${window.location.origin}${value}`;
+
+  if (normalizedValue.startsWith("/api/uploads/")) {
+    return joinUrl(window.location.origin, normalizedValue);
   }
-  return value;
+
+  if (normalizedValue.startsWith("/uploads/")) {
+    return buildApiUrl(normalizedValue);
+  }
+
+  if (normalizedValue.startsWith("api/uploads/")) {
+    return joinUrl(window.location.origin, normalizedValue);
+  }
+
+  if (normalizedValue.startsWith("uploads/")) {
+    return buildApiUrl(`/${normalizedValue}`);
+  }
+
+  if (normalizedValue.startsWith("/")) {
+    return joinUrl(window.location.origin, normalizedValue);
+  }
+
+  if (normalizedValue.includes("/uploads/")) {
+    const [, uploadPath] = normalizedValue.split("/uploads/");
+    return buildApiUrl(`/${APP.uploadsResource.replace(/^\//, "")}/${uploadPath}`);
+  }
+
+  return normalizedValue;
 }
 
 export function normalizeProducto(raw = {}) {
@@ -308,8 +340,17 @@ export async function fillCategorySelect(select, selectedValue = "") {
 }
 
 export function applyImagePreview(input, previewImage) {
+  const revokeCurrentObjectUrl = () => {
+    const previousObjectUrl = previewImage.dataset.objectUrl;
+    if (previousObjectUrl) {
+      URL.revokeObjectURL(previousObjectUrl);
+      delete previewImage.dataset.objectUrl;
+    }
+  };
+
   const updateFromCurrent = () => {
-    const fallbackSource = input.dataset.currentSrc || FALLBACK_IMAGE;
+    revokeCurrentObjectUrl();
+    const fallbackSource = resolveImageUrl(input.dataset.currentSrc || FALLBACK_IMAGE);
     previewImage.src = fallbackSource;
   };
 
@@ -322,17 +363,16 @@ export function applyImagePreview(input, previewImage) {
     }
 
     const objectUrl = URL.createObjectURL(file);
-    const previousObjectUrl = previewImage.dataset.objectUrl;
-    if (previousObjectUrl) {
-      URL.revokeObjectURL(previousObjectUrl);
-    }
-
+    revokeCurrentObjectUrl();
     previewImage.dataset.objectUrl = objectUrl;
     previewImage.src = objectUrl;
   });
 
   previewImage.addEventListener("error", () => {
+    revokeCurrentObjectUrl();
     previewImage.src = FALLBACK_IMAGE;
   });
+
+  window.addEventListener("beforeunload", revokeCurrentObjectUrl);
   updateFromCurrent();
 }
