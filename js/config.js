@@ -1,19 +1,23 @@
 export const APP = {
   name: "Catálogo Veloz",
   storageKey: "web-productos:apiBaseUrl",
-  defaultApiBaseUrl: "http://192.168.1.65/api/productos",
-  productsResource: "/productos"
+  defaultApiBaseUrl: "http://192.168.1.65/api",
+  productsResource: "/productos",
+  categoriesResource: "/categorias",
+  uploadsResource: "/uploads"
 };
 
 export function getApiBaseUrl() {
   const customBaseUrl = window.localStorage.getItem(APP.storageKey);
-  return (customBaseUrl || APP.defaultApiBaseUrl || "").replace(/\/$/, "");
+  return (customBaseUrl || APP.defaultApiBaseUrl)
+    .replace(/\/(productos|categorias|uploads)\/?$/, "")
+    .replace(/\/$/, "");
 }
 
 export function buildApiUrl(resource = "") {
   const normalizedResource = resource
     ? resource.startsWith("/")
-      ? resource.replace(/^\/productos/, "") // Evitar duplicados
+      ? resource
       : `/${resource}`
     : "";
 

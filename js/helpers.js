@@ -2,7 +2,24 @@ import { APP, ROUTES, buildApiUrl } from "./config.js";
 
 const FALLBACK_IMAGE = "./img/product-placeholder.svg";
 
+function isAbsoluteUrl(value = "") {
+  return /^https?:\/\//i.test(value);
+}
+
+export function resolveImageUrl(value) {
+  if (!value) return FALLBACK_IMAGE;
+  if (isAbsoluteUrl(value)) return value;
+  if (value.startsWith("/uploads/")) {
+    return buildApiUrl(value);
+  }
+  if (value.startsWith("/")) {
+    return `${window.location.origin}${value}`;
+  }
+  return value;
+}
+
 export function normalizeProducto(raw = {}) {
+  const imagePath = raw.imagen ?? raw.image ?? raw.image_url ?? raw.imagen_url ?? "";
   return {
     id: raw.id ?? raw._id ?? raw.producto_id ?? raw.codigo ?? "",
     nombre: raw.nombre ?? raw.name ?? raw.titulo ?? "Producto sin nombre",
@@ -10,7 +27,8 @@ export function normalizeProducto(raw = {}) {
     precio: parseFloat(raw.precio ?? raw.price ?? 0),
     categoria: raw.categoria ?? raw.category ?? (raw.categoria_id ? `Categoria #${raw.categoria_id}` : "General"),
     categoria_id: raw.categoria_id === null ? null : parseInt(raw.categoria_id ?? 0, 10),
-    imagen: raw.imagen ?? raw.image ?? raw.image_url ?? raw.imagen_url ?? FALLBACK_IMAGE,
+    imagen: resolveImageUrl(imagePath),
+    imagen_path: imagePath || null,
     stock: parseInt(raw.stock ?? raw.inventory ?? raw.existencias ?? 0, 10),
     sku: raw.sku ?? raw.SKU ?? raw.codigo ?? "",
     activo: raw.activo ?? true
@@ -76,27 +94,54 @@ export function setButtonLoading(button, isLoading, loadingLabel = "Procesando..
   button.textContent = button.dataset.originalLabel || button.textContent;
 }
 
-export function formDataToProductPayload(form) {
+export function getProductFormValues(form) {
   const formData = new FormData(form);
-  const categoriaId = formData.get("categoria_id");
+  const categoriaId = String(formData.get("categoria_id") || "").trim();
   return {
     nombre: String(formData.get("nombre") || "").trim(),
     descripcion: String(formData.get("descripcion") || "").trim(),
     precio: Number(formData.get("precio") || 0),
     categoria_id: categoriaId === "" ? null : Number(categoriaId),
-    imagen_url: String(formData.get("imagen_url") || "").trim() || null,
     stock: Number(formData.get("stock") || 0)
   };
 }
 
+export function buildProductFormData(form) {
+  const values = getProductFormValues(form);
+  const multipart = new FormData();
+
+  multipart.append("nombre", values.nombre);
+  multipart.append("descripcion", values.descripcion);
+  multipart.append("precio", String(values.precio));
+  multipart.append("stock", String(values.stock));
+
+  if (values.categoria_id !== null && !Number.isNaN(values.categoria_id)) {
+    multipart.append("categoria_id", String(values.categoria_id));
+  }
+
+  const currentImagePath = String(form.elements.imagen_actual?.value || "").trim();
+  if (currentImagePath) {
+    multipart.append("imagen_url", currentImagePath);
+  }
+
+  const imageFile = form.elements.imagen?.files?.[0];
+  if (imageFile) {
+    multipart.append("imagen", imageFile);
+  }
+
+  return multipart;
+}
+
 export async function requestJson(url, options = {}) {
-  console.log("URL de la solicitud:", url);
-  console.log("Opciones de la solicitud:", options);
+  const headers = { ...(options.headers || {}) };
+  const isFormData = options.body instanceof FormData;
+
+  if (!isFormData && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
+    headers,
     ...options
   });
 
@@ -130,7 +175,6 @@ export function extractItem(payload) {
 
 export async function fetchProductos() {
   const payload = await requestJson(buildApiUrl(APP.productsResource));
-  console.log("Respuesta de la API:", payload);
   return extractCollection(payload).map(normalizeProducto);
 }
 
@@ -146,7 +190,7 @@ export async function fetchProductoById(id) {
 export async function createProducto(data) {
   const payload = await requestJson(buildApiUrl(APP.productsResource), {
     method: "POST",
-    body: JSON.stringify(data)
+    body: data
   });
 
   return normalizeProducto(extractItem(payload) || data);
@@ -155,7 +199,7 @@ export async function createProducto(data) {
 export async function updateProducto(id, data) {
   const payload = await requestJson(buildApiUrl(`${APP.productsResource}/${id}`), {
     method: "PUT",
-    body: JSON.stringify(data)
+    body: data
   });
 
   return normalizeProducto(extractItem(payload) || { id, ...data });
@@ -245,15 +289,50 @@ export function renderDetail(producto) {
   `;
 }
 
+export async function fetchCategorias() {
+  const payload = await requestJson(buildApiUrl(APP.categoriesResource));
+  return Array.isArray(payload?.categorias) ? payload.categorias : [];
+}
+
+export async function fillCategorySelect(select, selectedValue = "") {
+  const categorias = await fetchCategorias();
+  select.innerHTML = '<option value="">Selecciona una categoria...</option>';
+
+  categorias.forEach((categoria) => {
+    const option = document.createElement("option");
+    option.value = categoria.categoria_id;
+    option.textContent = categoria.nombre;
+    option.selected = String(categoria.categoria_id) === String(selectedValue);
+    select.appendChild(option);
+  });
+}
+
 export function applyImagePreview(input, previewImage) {
-  const update = () => {
-    const value = input.value.trim();
-    previewImage.src = value || FALLBACK_IMAGE;
+  const updateFromCurrent = () => {
+    const fallbackSource = input.dataset.currentSrc || FALLBACK_IMAGE;
+    previewImage.src = fallbackSource;
   };
 
-  input.addEventListener("input", update);
+  input.addEventListener("change", () => {
+    const file = input.files?.[0];
+
+    if (!file) {
+      updateFromCurrent();
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    const previousObjectUrl = previewImage.dataset.objectUrl;
+    if (previousObjectUrl) {
+      URL.revokeObjectURL(previousObjectUrl);
+    }
+
+    previewImage.dataset.objectUrl = objectUrl;
+    previewImage.src = objectUrl;
+  });
+
   previewImage.addEventListener("error", () => {
     previewImage.src = FALLBACK_IMAGE;
   });
-  update();
+  updateFromCurrent();
 }

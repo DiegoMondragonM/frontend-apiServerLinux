@@ -40,8 +40,8 @@
           </p>
           <ul class="check-list">
             <li>Nombre y precio son obligatorios.</li>
-            <li>La imagen puede ser una URL pública.</li>
-            <li>Usa el ID de categoría que exista en tu base de datos.</li>
+            <li>La imagen puede ser JPG, JPEG o PNG.</li>
+            <li>La categoria se carga desde tu API.</li>
           </ul>
         </article>
 
@@ -70,8 +70,8 @@
             </label>
 
             <label class="field field-full">
-              <span>URL de imagen</span>
-              <input id="imagen-input" name="imagen_url" type="url" placeholder="https://...">
+              <span>Imagen del producto</span>
+              <input id="imagen-input" name="imagen" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
             </label>
 
             <label class="field field-full">

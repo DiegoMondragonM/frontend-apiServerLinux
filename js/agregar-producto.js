@@ -1,43 +1,28 @@
-import { ROUTES, getApiBaseUrl } from "./config.js";
+import { ROUTES } from "./config.js";
 import {
   applyImagePreview,
+  buildProductFormData,
   createProducto,
-  formDataToProductPayload,
+  fillCategorySelect,
+  getProductFormValues,
   setButtonLoading,
-  showToast,
-  requestJson
+  showToast
 } from "./helpers.js";
 
 const form = document.getElementById("producto-form");
 const submitButton = document.getElementById("submit-button");
 const imageInput = document.getElementById("imagen-input");
 const previewImage = document.getElementById("preview-image");
+const categorySelect = document.getElementById("categoria-select");
 
 applyImagePreview(imageInput, previewImage);
 
 async function cargarCategorias() {
-  const select = document.getElementById("categoria-select");
-
   try {
-    const response = await requestJson("http://192.168.1.65/api/categorias");
-
-    if (response.ok && response.categorias) {
-      select.innerHTML = '<option value="">Selecciona una categoría...</option>';
-
-      response.categorias.forEach(cat => {
-        const option = document.createElement("option");
-        option.value = cat.categoria_id;
-        option.textContent = cat.nombre;
-        select.appendChild(option);
-      });
-
-    } else {
-      select.innerHTML = '<option value="">Error al cargar categorías</option>';
-    }
-
+    await fillCategorySelect(categorySelect);
   } catch (error) {
-    console.error("Error al cargar categorías:", error);
-    select.innerHTML = '<option value="">Error de conexión</option>';
+    categorySelect.innerHTML = '<option value="">Error de conexion</option>';
+    showToast("No se pudieron cargar las categorias.", "error");
   }
 }
 
@@ -46,9 +31,10 @@ cargarCategorias();
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
-  const payload = formDataToProductPayload(form);
+  const values = getProductFormValues(form);
+  const payload = buildProductFormData(form);
 
-  if (!payload.nombre || payload.precio <= 0) {
+  if (!values.nombre || values.precio <= 0) {
     showToast("Ingresa un nombre y un precio mayor a cero.", "error");
     return;
   }

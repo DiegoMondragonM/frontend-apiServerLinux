@@ -36,8 +36,8 @@
           </p>
           <ul class="check-list">
             <li>Abre esta página con <code>?id=123</code>.</li>
-            <li>Si tu API devuelve otro nombre de campos, podemos mapearlos en <code>helpers.js</code>.</li>
-            <li>Usa el ID de categoría que exista en tu base de datos.</li>
+            <li>Puedes conservar la imagen actual o reemplazarla por un archivo nuevo.</li>
+            <li>La categoria se carga desde tu API.</li>
           </ul>
         </article>
 
@@ -54,8 +54,10 @@
             </label>
 
             <label class="field">
-              <span>ID de categoría</span>
-              <input name="categoria_id" type="number" min="1" step="1" placeholder="1">
+              <span>Categoría</span>
+              <select name="categoria_id" id="categoria-select" required>
+                <option value="">Cargando categorias...</option>
+              </select>
             </label>
 
             <label class="field">
@@ -64,9 +66,10 @@
             </label>
 
             <label class="field field-full">
-              <span>URL de imagen</span>
-              <input id="imagen-input" name="imagen_url" type="url" placeholder="https://...">
+              <span>Reemplazar imagen</span>
+              <input id="imagen-input" name="imagen" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" data-current-src="./img/product-placeholder.svg">
             </label>
+            <input type="hidden" name="imagen_actual" value="">
 
             <label class="field field-full">
               <span>Descripción</span>
